@@ -1,6 +1,6 @@
 <template>
-  <div class="goods-item">
-    <img :src="goodsItem.show.img" alt="" />
+  <div class="goods-item" @click="itemClick">
+    <img :src="showImg" alt="无" @load="imageLoad" />
     <div class="goods-info">
       <p>{{ goodsItem.title }}</p>
       <span class="price">{{ goodsItem.price }}</span>
@@ -18,6 +18,34 @@ export default {
       default() {
         return {};
       },
+    },
+  },
+  computed: {
+    showImg() {
+      return this.goodsItem.image || this.goodsItem.show.img;
+    },
+  },
+  methods: {
+    imageLoad() {
+      // 利用时间总线向爷爷发送事件
+
+      // 方法1
+      if (this.$route.path.indexOf("/home") !== -1) {
+        this.$bus.$emit("homeItemImageLoad");
+      } else if (this.$route.path.indexOf("/detail") !== -1) {
+        this.$bus.$emit("detailItemImageLoad");
+      }
+
+      // 方法2
+      // if (this.goodsItem.show) this.$bus.$emit("homeItemImageLoad");
+      // if (this.goodsItem.image) this.$bus.$emit("detailItemImageLoad");
+
+      // 方法3 利用deactiveted() 取消监听
+    },
+    itemClick() {
+      if (this.goodsItem.iid) {
+        this.$router.push("/detail/" + this.goodsItem.iid);
+      }
     },
   },
 };
