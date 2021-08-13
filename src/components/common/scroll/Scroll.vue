@@ -3,7 +3,7 @@
   <!-- ref如果是绑定在普通元素中,那么通过this.$refs.refname获取到的就是一个元素对象 -->
   <!-- ref绑定子组件 -->
   <div class="wrapper" ref="wrapper">
-    <div class="content">
+    <div>
       <slot></slot>
     </div>
   </div>

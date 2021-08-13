@@ -7,7 +7,7 @@
     />
     <scroll
       class="detail-content"
-      ref="detailScroll"
+      ref="scroll"
       :probe-type="3"
       @scroll="detailScroll"
     >
@@ -22,6 +22,8 @@
       <detail-comment-info :comment-info="commentInfo" ref="comment" />
       <goods-list :goods="recommendInfo" ref="recommend" />
     </scroll>
+    <detail-bottom-bar @addCart="addToCart" />
+    <back-top @click.native="backClick" v-show="isShowBackTop" />
   </div>
 </template>
 
@@ -33,11 +35,13 @@ import DetailShopInfo from "./childComps/DetailShopInfo.vue";
 import DetailGoodsInfo from "./childComps/DetailGoodsInfo.vue";
 import DetailParamsInfo from "./childComps/DetailParamsInfo.vue";
 import DetailCommentInfo from "./childComps/DetailCommentInfo.vue";
+import DetailBottomBar from "./childComps/DetailBottomBar.vue";
 
 import Scroll from "components/common/scroll/Scroll";
 import GoodsList from "components/content/goods/GoodsList.vue";
-import { debounce } from "common/utils.js";
 
+import { debounce } from "common/utils.js";
+import { backTopMixin } from "common/mixin.js";
 import {
   getDetail,
   Goods,
@@ -55,6 +59,7 @@ export default {
     DetailGoodsInfo,
     DetailParamsInfo,
     DetailCommentInfo,
+    DetailBottomBar,
     Scroll,
     GoodsList,
   },
@@ -75,6 +80,7 @@ export default {
       currentIndex: 0,
     };
   },
+  mixins: [backTopMixin],
   created() {
     // 保存传入的iid
     this.iid = this.$route.params.iid;
@@ -118,7 +124,6 @@ export default {
     // 下一帧
     this.$nextTick(() => {});
     this.getThemeTopYs = debounce(() => {
-      console.log(this.$refs.test.$el.offsetTop);
       this.themeTopYs = [0];
       this.themeTopYs.push(this.$refs.params.$el.offsetTop);
       this.themeTopYs.push(this.$refs.comment.$el.offsetTop);
@@ -127,20 +132,20 @@ export default {
     }, 100);
   },
   mounted() {
-    this.refresh = debounce(this.$refs.detailScroll.refresh, 50);
+    this.refresh = debounce(this.$refs.scroll.refresh, 50);
     this.$bus.$on("detailItemImageLoad", () => {
       this.refresh();
     });
   },
   methods: {
     detailImageLoad() {
-      // this.$refs.detailScroll.refresh();
+      // this.$refs.scroll.refresh();
       this.refresh();
       this.getThemeTopYs();
     },
     titleClick(index) {
       // console.log(index);
-      this.$refs.detailScroll.scrollTo(0, -this.themeTopYs[index], 500);
+      this.$refs.scroll.scrollTo(0, -this.themeTopYs[index], 500);
     },
     detailScroll(position) {
       const positionY = -position.y;
@@ -154,6 +159,22 @@ export default {
           break;
         }
       }
+      // 或者可以在数据最后加一个Number.MAX_VALUE 然后遍历数据前n-1个 判断区间即可
+
+      this.isShowBackTop = -position.y > 1000;
+    },
+    addToCart() {
+      // 1.获取商品信息
+      const product = {};
+      product.iid = this.iid;
+      product.image = this.topImages[0];
+      product.title = this.goods.title;
+      product.desc = this.goods.desc;
+      product.price = this.goods.realPrice;
+
+      // 2.添加到购物车
+      // this.$store.commit("addCart", product);
+      this.$store.dispatch("addCart", product);
     },
   },
 };
@@ -175,6 +196,6 @@ export default {
 .detail-content {
   /* 不加relative的话 offsetTof会多出nav的44px */
   position: relative;
-  height: calc(100% - 44px);
+  height: calc(100% - 44px - 49px);
 }
 </style>
