@@ -49,6 +49,7 @@ import {
   GoodsParams,
   getRecommend,
 } from "network/detail";
+import { mapActions } from "vuex";
 
 export default {
   components: {
@@ -138,6 +139,7 @@ export default {
     });
   },
   methods: {
+    ...mapActions(["addCart"]),
     detailImageLoad() {
       // this.$refs.scroll.refresh();
       this.refresh();
@@ -173,8 +175,10 @@ export default {
       product.price = this.goods.realPrice;
 
       // 2.添加到购物车
-      // this.$store.commit("addCart", product);
-      this.$store.dispatch("addCart", product);
+      // this.$store.dispatch("addCart", product).then((res) => console.log(res));
+      this.addCart(product).then((res) => {
+        this.$toast.show(res, 2000);
+      });
     },
   },
 };

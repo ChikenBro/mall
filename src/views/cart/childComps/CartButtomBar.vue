@@ -5,7 +5,7 @@
       <b class="all">全选</b>
     </div>
     <div class="money">合计：{{ totalPrice }}</div>
-    <div class="to-count">去结算 {{ checkLength }}</div>
+    <div class="to-count" @click="toCount">去结算 {{ checkLength }}</div>
   </div>
 </template>
 
@@ -48,6 +48,15 @@ export default {
       }
 
       // this.cartList.forEach((item) => (item.checked = !this.isSelectAll)); 不可以
+    },
+    toCount() {
+      if (
+        this.$store.state.cartList.filter((item) => item.checked).length === 0
+      ) {
+        this.$toast.show("你当前未选中商品");
+      } else {
+        this.$toast.show("当前商品合计" + this.totalPrice);
+      }
     },
   },
 };
